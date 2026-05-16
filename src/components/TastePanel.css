@@ -1,0 +1,454 @@
+.taste-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+  padding: 0 2px;
+}
+
+/* ===== Empty State ===== */
+.taste-empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.taste-empty-icon {
+  font-size: 48px;
+  opacity: 0.3;
+}
+
+.taste-empty-state h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.taste-empty-state p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0;
+  max-width: 280px;
+  line-height: 1.6;
+}
+
+/* ===== Merged Hero + Taste Summary Card ===== */
+.taste-hero-card {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(0, 229, 255, 0.04));
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  border-radius: 16px;
+  padding: 14px 18px 16px;
+  flex-shrink: 0;
+  transition: background 0.5s ease;
+}
+
+.taste-hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.taste-hero-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.taste-hero-emoji {
+  font-size: 30px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.taste-hero-type {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 2px;
+}
+
+.taste-hero-desc {
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+}
+
+.taste-hero-traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.taste-hero-trait {
+  font-size: 11px;
+  padding: 2px 10px;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.12);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.taste-refresh-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.taste-refresh-btn:hover {
+  background: rgba(0, 229, 255, 0.08);
+  color: rgba(0, 229, 255, 0.6);
+  border-color: rgba(0, 229, 255, 0.15);
+}
+
+/* ===== Hero Loading / Error ===== */
+.taste-hero-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.taste-loading-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(139, 92, 246, 0.15);
+  border-top-color: #8b5cf6;
+  border-radius: 50%;
+  animation: tasteSpin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes tasteSpin {
+  to { transform: rotate(360deg); }
+}
+
+.taste-hero-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(248, 113, 113, 0.04);
+  border-radius: 10px;
+  font-size: 12px;
+  color: #f87171;
+}
+
+.taste-retry-btn {
+  padding: 4px 12px;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: 8px;
+  background: rgba(248, 113, 113, 0.06);
+  color: #f87171;
+  cursor: pointer;
+  font-size: 11px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.taste-retry-btn:hover {
+  background: rgba(248, 113, 113, 0.1);
+}
+
+/* ===== Hero Analysis (AI Taste Summary) ===== */
+.taste-hero-analysis {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.taste-hero-summary {
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.04), rgba(0, 229, 255, 0.03));
+  border: 1px solid rgba(139, 92, 246, 0.06);
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.taste-hero-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.taste-hero-genre-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.taste-hero-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.taste-vibe-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  animation: tasteVibePulse 2.5s ease-in-out infinite;
+}
+
+@keyframes tasteVibePulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(139, 92, 246, 0.2); }
+  50% { box-shadow: 0 0 18px rgba(139, 92, 246, 0.4); }
+}
+
+.taste-fun-fact {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.taste-fun-fact-icon {
+  font-size: 14px;
+}
+
+/* ===== Recommendation Section (60%) ===== */
+.taste-rec-section {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 14px;
+}
+
+.taste-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  flex-shrink: 0;
+}
+
+.taste-section-icon {
+  font-size: 14px;
+}
+
+.taste-section-title {
+  flex: 1;
+}
+
+.taste-rec-refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid rgba(0, 229, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(0, 229, 255, 0.05);
+  color: rgba(0, 229, 255, 0.6);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.taste-rec-refresh-btn:hover {
+  background: rgba(0, 229, 255, 0.1);
+  border-color: rgba(0, 229, 255, 0.2);
+  color: rgba(0, 229, 255, 0.8);
+}
+
+.taste-rec-loading,
+.taste-rec-error,
+.taste-rec-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 30px;
+}
+
+.taste-rec-loading p,
+.taste-rec-error p,
+.taste-rec-empty p {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0;
+}
+
+.taste-rec-error {
+  color: #f87171;
+}
+
+.taste-rec-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 10px 10px;
+}
+
+.taste-rec-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.taste-rec-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.taste-rec-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+}
+
+.taste-rec-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.taste-rec-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.taste-rec-item:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.taste-rec-item + .taste-rec-item {
+  border-top: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.taste-rec-cover {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(0, 229, 255, 0.1));
+}
+
+.taste-rec-cover-placeholder {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(0, 229, 255, 0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.taste-rec-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.taste-rec-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taste-rec-artist {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taste-rec-reason {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taste-rec-score-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+  min-width: 45px;
+}
+
+.taste-rec-score {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(139, 92, 246, 0.7);
+}
+
+.taste-rec-score-bar {
+  width: 36px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.taste-rec-score-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #00e5ff);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
