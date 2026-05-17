@@ -389,3 +389,20 @@
   overflow: hidden;
   line-height: 1.3;
 }
+
+.playlist-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  margin: 4px 16px 0;
+}
+.playlist-back-btn:hover {
+  color: rgba(255, 255, 255, 0.7);
+}

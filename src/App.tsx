@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { AppProvider, useAppState } from './context/AppContext'
 import { musicService } from './services/musicService'
-import { setNeteaseCookie } from './services/api'
+import { setNeteaseCookie, getSongUrl } from './services/api'
 import { userProfile } from './services/userProfile'
 import PetDog from './components/PetDog'
 import AmbientCanvas from './components/AmbientCanvas'
@@ -40,10 +40,20 @@ function AppContent() {
       dispatch({ type: 'SET_CURRENT_TIME', payload: time })
     })
 
-    musicService.onEndedCallback(() => {
-      musicService.next().then(() => {
-        dispatch({ type: 'SET_CURRENT_SONG', payload: musicService.getCurrentSong() })
-      })
+    musicService.onEndedCallback(async () => {
+      const list = [...musicService.getPlaylist()]
+      const idx = musicService.getCurrentIndex()
+      const nextIdx = (idx + 1) % list.length
+      const nextSong = list[nextIdx]
+      if (nextSong?.path.startsWith('netease://') && !nextSong?.url) {
+        const url = await getSongUrl(nextSong.id).catch(() => null)
+        if (url) {
+          list[nextIdx] = { ...nextSong, url }
+          musicService.setPlaylist(list)
+        }
+      }
+      await musicService.next()
+      dispatch({ type: 'SET_CURRENT_SONG', payload: musicService.getCurrentSong() })
     })
 
     musicService.onPlayStateChangeCallback((playing) => {

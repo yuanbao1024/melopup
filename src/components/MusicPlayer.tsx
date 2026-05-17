@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useAppState } from '../context/AppContext'
 import { musicService } from '../services/musicService'
 import { userProfile } from '../services/userProfile'
-import { getLyric } from '../services/api'
+import { getSongUrl, getLyric } from '../services/api'
+import { Song } from '../types'
 import './MusicPlayer.css'
 
 interface LyricLine {
@@ -21,6 +22,7 @@ export default function MusicPlayer() {
   const lyricsRef = useRef<HTMLDivElement>(null)
   const activeRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const progressBarRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef<number>(0)
 
   useEffect(() => {
@@ -104,17 +106,57 @@ export default function MusicPlayer() {
     return () => cancelAnimationFrame(animationRef.current)
   }, [isPlaying])
 
+  const handleProgressClick = (e: React.MouseEvent) => {
+    const rect = progressBarRef.current?.getBoundingClientRect()
+    if (!rect || duration <= 0) return
+    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
+    musicService.seek(pct * duration)
+  }
+
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60)
     const sec = Math.floor(s % 60)
     return `${m}:${sec.toString().padStart(2, '0')}`
   }
 
-  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const pct = x / rect.width
-    musicService.seek(pct * duration)
+  const resolveSongUrl = async (song: Song): Promise<Song> => {
+    if (song.url) return song
+    if (!song.path.startsWith('netease://')) return song
+    const url = await getSongUrl(song.id).catch(() => null)
+    if (!url) return song
+    return { ...song, url }
+  }
+
+  const handlePrev = async () => {
+    const list = [...musicService.getPlaylist()]
+    const idx = musicService.getCurrentIndex()
+    if (list.length === 0) return
+    const prevIdx = (idx - 1 + list.length) % list.length
+    if (list[prevIdx]?.path.startsWith('netease://') && !list[prevIdx]?.url) {
+      const resolved = await resolveSongUrl(list[prevIdx])
+      list[prevIdx] = resolved
+      musicService.setPlaylist(list)
+      dispatch({ type: 'SET_PLAYLIST', payload: list })
+    }
+    await musicService.prev()
+    dispatch({ type: 'SET_CURRENT_SONG', payload: musicService.getCurrentSong() })
+    dispatch({ type: 'SET_IS_PLAYING', payload: musicService.getIsPlaying() })
+  }
+
+  const handleNext = async () => {
+    const list = [...musicService.getPlaylist()]
+    const idx = musicService.getCurrentIndex()
+    if (list.length === 0) return
+    const nextIdx = (idx + 1) % list.length
+    if (list[nextIdx]?.path.startsWith('netease://') && !list[nextIdx]?.url) {
+      const resolved = await resolveSongUrl(list[nextIdx])
+      list[nextIdx] = resolved
+      musicService.setPlaylist(list)
+      dispatch({ type: 'SET_PLAYLIST', payload: list })
+    }
+    await musicService.next()
+    dispatch({ type: 'SET_CURRENT_SONG', payload: musicService.getCurrentSong() })
+    dispatch({ type: 'SET_IS_PLAYING', payload: musicService.getIsPlaying() })
   }
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0
@@ -166,7 +208,7 @@ export default function MusicPlayer() {
       </div>
 
       <div className="lp-progress-section">
-        <div className="lp-progress-bar" onClick={handleSeek}>
+        <div className="lp-progress-bar" ref={progressBarRef} onClick={handleProgressClick}>
           <div className="lp-progress-track">
             <div className="lp-progress-fill" style={{ width: `${progress}%` }} />
             <div className="lp-progress-thumb" style={{ left: `${progress}%` }} />
@@ -180,7 +222,7 @@ export default function MusicPlayer() {
       </div>
 
       <div className="lp-controls">
-        <button className="lp-ctrl-btn" onClick={() => musicService.prev()} title="上一首">
+        <button className="lp-ctrl-btn" onClick={handlePrev} title="上一首">
           <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
             <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
           </svg>
@@ -202,7 +244,7 @@ export default function MusicPlayer() {
           )}
         </button>
 
-        <button className="lp-ctrl-btn" onClick={() => musicService.next()} title="下一首">
+        <button className="lp-ctrl-btn" onClick={handleNext} title="下一首">
           <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
             <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
           </svg>

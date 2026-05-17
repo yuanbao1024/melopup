@@ -4,6 +4,7 @@ import { userProfile } from '../services/userProfile'
 import { getTasteSummary, getProfileRecommendations } from '../services/aiService'
 import { searchSongs, getSongUrl } from '../services/api'
 import { musicService } from '../services/musicService'
+import { Song } from '../types'
 import './TastePanel.css'
 
 interface RecSong {
@@ -23,6 +24,15 @@ interface TasteData {
   vibeColor: string
 }
 
+interface CacheData {
+  timestamp: number
+  tasteSummary: TasteData | null
+  recommendedSongs: RecSong[]
+}
+
+const CACHE_KEY = 'taste_cache'
+const CACHE_TTL = 1800000
+
 const GENRE_COLORS = [
   'linear-gradient(135deg, #8b5cf6, #a78bfa)',
   'linear-gradient(135deg, #00e5ff, #26c6da)',
@@ -30,6 +40,29 @@ const GENRE_COLORS = [
   'linear-gradient(135deg, #fbbf24, #f59e0b)',
   'linear-gradient(135deg, #34d399, #10b981)',
 ]
+
+function loadCache(): CacheData | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    if (!raw) return null
+    const data: CacheData = JSON.parse(raw)
+    if (Date.now() - data.timestamp < CACHE_TTL) {
+      return data
+    }
+  } catch {
+    // ignore
+  }
+  return null
+}
+
+function saveCache(tasteSummary: TasteData | null, recommendedSongs: RecSong[]) {
+  try {
+    const data: CacheData = { timestamp: Date.now(), tasteSummary, recommendedSongs }
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data))
+  } catch {
+    // ignore
+  }
+}
 
 export default function TastePanel() {
   const { state, dispatch } = useAppState()
@@ -45,6 +78,7 @@ export default function TastePanel() {
 
   const [profileState, setProfileState] = useState(() => userProfile.getProfile())
   const [lastRefresh, setLastRefresh] = useState(0)
+  const [coverMap, setCoverMap] = useState<Record<string, string>>({})
 
   useEffect(() => {
     const unsub = userProfile.subscribe(() => {
@@ -53,56 +87,88 @@ export default function TastePanel() {
     return () => { unsub() }
   }, [])
 
-  const loadTasteSummary = useCallback(async () => {
+  const loadData = useCallback(async () => {
     if (!apiConfigured) return
-    setIsLoadingTaste(true)
-    setTasteError(null)
-    try {
-      const result = await getTasteSummary(userProfile.getPersonalitySummary())
-      setTasteSummary(result)
-    } catch (err: any) {
-      setTasteError(err.message || '加载品味分析失败')
-    } finally {
-      setIsLoadingTaste(false)
-    }
-  }, [apiConfigured])
 
-  const loadRecommendations = useCallback(async () => {
-    if (!apiConfigured) return
-    setIsLoadingRecs(true)
-    setRecError(null)
-    try {
-      const recs = await getProfileRecommendations(userProfile.getPersonalitySummary())
-      const enriched = await Promise.allSettled(
-        recs.slice(0, 15).map(async (r) => {
-          try {
-            const result = await searchSongs(`${r.name} ${r.artist}`, 1)
-            const song = result.songs[0]
-            return { ...r, cover: song?.cover, neteaseId: song?.id }
-          } catch {
-            return { ...r }
-          }
-        })
-      )
-      setRecommendedSongs(
-        enriched.map((r) => r.status === 'fulfilled' ? r.value : null)
-          .filter((s): s is RecSong => s !== null && !!s.name)
-      )
-    } catch (err: any) {
-      setRecError(err.message || '加载推荐失败')
-    } finally {
-      setIsLoadingRecs(false)
+    const cached = loadCache()
+    if (cached) {
+      setTasteSummary(cached.tasteSummary)
+      setRecommendedSongs(cached.recommendedSongs)
+      return
     }
+
+    setIsLoadingTaste(true)
+    setIsLoadingRecs(true)
+    setTasteError(null)
+    setRecError(null)
+
+    const personalitySummary = userProfile.getPersonalitySummary()
+
+    const [tasteResult, recResult] = await Promise.allSettled([
+      getTasteSummary(personalitySummary),
+      getProfileRecommendations(personalitySummary),
+    ])
+
+    let taste: TasteData | null = null
+    let recs: RecSong[] = []
+
+    if (tasteResult.status === 'fulfilled') {
+      taste = tasteResult.value
+      setTasteSummary(taste)
+    } else {
+      setTasteError(tasteResult.reason?.message || '加载品味分析失败')
+    }
+
+    if (recResult.status === 'fulfilled') {
+      recs = recResult.value.slice(0, 10)
+      setRecommendedSongs(recs)
+    } else {
+      setRecError(recResult.reason?.message || '加载推荐失败')
+    }
+
+    saveCache(taste, recs)
+
+    setIsLoadingTaste(false)
+    setIsLoadingRecs(false)
   }, [apiConfigured])
 
   useEffect(() => {
     if (apiConfigured) {
-      loadTasteSummary()
-      loadRecommendations()
+      setCoverMap({})
+      loadData()
     }
-  }, [apiConfigured, lastRefresh])
+  }, [apiConfigured, lastRefresh, loadData])
+
+  useEffect(() => {
+    if (recommendedSongs.length === 0) return
+
+    let cancelled = false
+
+    const loadCovers = async () => {
+      const map: Record<string, string> = {}
+      for (const song of recommendedSongs) {
+        if (cancelled) break
+        try {
+          const result = await searchSongs(`${song.name} ${song.artist}`, 1)
+          const found = result.songs[0]
+          if (found?.cover) {
+            map[`${song.name}-${song.artist}`] = found.cover
+          }
+        } catch {
+          // ignore
+        }
+      }
+      if (!cancelled) {
+        setCoverMap(map)
+      }
+    }
+
+    loadCovers()
+    return () => { cancelled = true }
+  }, [recommendedSongs])
 
   const handleRefresh = useCallback(() => {
+    localStorage.removeItem(CACHE_KEY)
     setLastRefresh(Date.now())
   }, [])
 
@@ -110,7 +176,7 @@ export default function TastePanel() {
     try {
       await musicService.ensureAudioGraph()
       await musicService.ensureGesture()
-      let songToPlay: any = null
+      let songToPlay: Song | null = null
       if (rec.neteaseId) {
         const url = await getSongUrl(rec.neteaseId)
         if (url) {
@@ -134,16 +200,33 @@ export default function TastePanel() {
         }
       }
       if (!songToPlay) return
-      musicService.addToPlaylist([songToPlay])
-      const fullPlaylist = musicService.getPlaylist()
-      dispatch({ type: 'SET_PLAYLIST', payload: fullPlaylist })
-      await musicService.playSong(fullPlaylist.length - 1)
+
+      const allSongs: Song[] = recommendedSongs.map(r => ({
+        id: r.neteaseId || r.name,
+        name: r.name,
+        artist: r.artist,
+        cover: r.cover || coverMap[`${r.name}-${r.artist}`],
+        path: r.neteaseId ? `netease://${r.neteaseId}` : r.name,
+        duration: 0,
+      }))
+
+      const playIdx = allSongs.findIndex(s => s.id === songToPlay!.id)
+      if (playIdx >= 0) {
+        allSongs[playIdx] = songToPlay
+        musicService.setPlaylist(allSongs)
+        dispatch({ type: 'SET_PLAYLIST', payload: allSongs })
+        await musicService.playSong(playIdx)
+      } else {
+        musicService.setPlaylist([songToPlay])
+        dispatch({ type: 'SET_PLAYLIST', payload: [songToPlay] })
+        await musicService.playSong(0)
+      }
       dispatch({ type: 'SET_CURRENT_SONG', payload: musicService.getCurrentSong() })
       dispatch({ type: 'SET_IS_PLAYING', payload: true })
       dispatch({ type: 'SET_PET_MOOD', payload: 'listening' })
     } catch {
     }
-  }, [dispatch])
+  }, [dispatch, recommendedSongs, coverMap])
 
   const p = profileState.personality
 
@@ -197,7 +280,7 @@ export default function TastePanel() {
         ) : tasteError ? (
           <div className="taste-hero-error">
             <span>{tasteError}</span>
-            <button className="taste-retry-btn" onClick={loadTasteSummary}>重试</button>
+            <button className="taste-retry-btn" onClick={loadData}>重试</button>
           </div>
         ) : tasteSummary ? (
           <div className="taste-hero-analysis">
@@ -243,14 +326,14 @@ export default function TastePanel() {
         ) : recError ? (
           <div className="taste-rec-error">
             <p>{recError}</p>
-            <button className="taste-retry-btn" onClick={loadRecommendations}>重试</button>
+            <button className="taste-retry-btn" onClick={loadData}>重试</button>
           </div>
         ) : recommendedSongs.length > 0 ? (
           <div className="taste-rec-list">
             {recommendedSongs.map((song, i) => (
               <div key={`${song.name}-${song.artist}-${i}`} className="taste-rec-item" onClick={() => handlePlayRecSong(song)}>
-                {song.cover ? (
-                  <img className="taste-rec-cover" src={song.cover} alt={song.name} />
+                {coverMap[`${song.name}-${song.artist}`] ? (
+                  <img className="taste-rec-cover" src={coverMap[`${song.name}-${song.artist}`]} alt={song.name} />
                 ) : (
                   <div className="taste-rec-cover-placeholder">♪</div>
                 )}

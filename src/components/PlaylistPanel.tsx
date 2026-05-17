@@ -115,12 +115,10 @@ export default function PlaylistPanel() {
         setSearchResults(updatedSource)
       }
 
-      musicService.addToPlaylist([song])
-      const fullPlaylist = musicService.getPlaylist()
-      dispatch({ type: 'SET_PLAYLIST', payload: fullPlaylist })
+      musicService.setPlaylist(updatedSource)
+      dispatch({ type: 'SET_PLAYLIST', payload: updatedSource })
 
-      const songIndex = fullPlaylist.length - 1
-      await musicService.playSong(songIndex)
+      await musicService.playSong(index)
       dispatch({ type: 'SET_CURRENT_SONG', payload: musicService.getCurrentSong() })
       dispatch({ type: 'SET_IS_PLAYING', payload: true })
       dispatch({ type: 'SET_PET_MOOD', payload: 'listening' })
@@ -217,6 +215,14 @@ export default function PlaylistPanel() {
           </div>
         ) : displaySongs.length > 0 ? (
           <>
+            {selectedPlaylistName && (
+              <button className="playlist-back-btn" onClick={() => { setSelectedPlaylistSongs([]); setSelectedPlaylistName(''); setHasSearched(false) }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                  <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                返回歌单推荐
+              </button>
+            )}
             <div className="playlist-subheader">
               <span className="playlist-subtitle">
                 {selectedPlaylistName || `搜索结果"${searchQuery}"`}

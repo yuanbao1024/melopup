@@ -392,3 +392,24 @@
   color: rgba(234, 179, 8, 0.7) !important;
   font-size: 11px !important;
 }
+
+.settings-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+  margin-left: 20px;
+  width: fit-content;
+}
+.settings-back-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.8);
+}
