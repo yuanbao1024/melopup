@@ -469,11 +469,15 @@ export function saveApiConfig(apiKey: string, baseURL?: string, model?: string) 
 }
 
 export function getApiConfig() {
-  const baseURL = localStorage.getItem('OPENAI_BASE_URL') || 'https://api.openai.com/v1'
+  const envKey = import.meta.env.VITE_OPENAI_API_KEY as string | undefined
+  const envBaseURL = import.meta.env.VITE_OPENAI_BASE_URL as string | undefined
+  const envModel = import.meta.env.VITE_OPENAI_MODEL as string | undefined
+
+  const baseURL = localStorage.getItem('OPENAI_BASE_URL') || envBaseURL || 'https://api.openai.com/v1'
   return {
-    apiKey: localStorage.getItem('OPENAI_API_KEY') || '',
+    apiKey: localStorage.getItem('OPENAI_API_KEY') || envKey || '',
     baseURL,
-    model: localStorage.getItem('OPENAI_MODEL') || getDefaultModel(),
+    model: localStorage.getItem('OPENAI_MODEL') || envModel || getDefaultModel(),
   }
 }
 
