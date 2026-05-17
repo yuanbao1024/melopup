@@ -125,7 +125,10 @@ export default function MusicPlayer() {
     if (song.url) return song
     if (!song.path.startsWith('netease://')) return song
     const url = await getSongUrl(song.id).catch(() => null)
-    if (!url) return song
+    if (!url) {
+      if (musicService.onError) musicService.onError(`"${song.name}" 暂无版权或播放地址`)
+      return song
+    }
     return { ...song, url }
   }
 

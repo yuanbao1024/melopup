@@ -12,6 +12,7 @@ class MusicService {
   private onTimeUpdate: ((time: number) => void) | null = null
   private onEnded: (() => void) | null = null
   private onPlayStateChange: ((playing: boolean) => void) | null = null
+  onError: ((message: string) => void) | null = null
   private animationFrameId: number | null = null
   private listeners: Array<() => void> = []
   private _audioGraphReady = false
@@ -59,11 +60,11 @@ class MusicService {
 
     this.boundError = () => {
       const mediaError = audioElement.error
-      console.error('音频加载错误:', {
-        code: mediaError?.code,
-        message: mediaError?.message || '未知错误',
-        src: audioElement.src?.slice(0, 100),
-      })
+      const msg = mediaError?.code === 4
+        ? '这首歌暂无版权或播放受限'
+        : `音频加载失败 (${mediaError?.code || '未知错误'})`
+      console.error('音频错误:', msg, { src: audioElement.src?.slice(0, 60) })
+      if (this.onError) this.onError(msg)
     }
 
     audioElement.addEventListener('timeupdate', this.boundTimeUpdate)

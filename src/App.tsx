@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { AppProvider, useAppState } from './context/AppContext'
 import { musicService } from './services/musicService'
 import { setNeteaseCookie, getSongUrl } from './services/api'
@@ -19,6 +19,18 @@ function AppContent() {
   const { state, dispatch } = useAppState()
   const { view, currentSong } = state
   const audioRef = useRef<HTMLAudioElement>(null)
+  const [notification, setNotification] = useState<{ msg: string; id: number } | null>(null)
+  const notifIdRef = useRef(0)
+
+  useEffect(() => {
+    musicService.onError = (msg) => {
+      notifIdRef.current += 1
+      const id = notifIdRef.current
+      setNotification({ msg, id })
+      setTimeout(() => setNotification((prev) => (prev?.id === id ? null : prev)), 4000)
+    }
+    return () => { musicService.onError = null }
+  }, [])
 
   useEffect(() => {
     if (audioRef.current) {
@@ -186,6 +198,12 @@ function AppContent() {
         <div className="app-content">
           {renderContent()}
         </div>
+
+        {notification && (
+          <div className="app-notification" key={notification.id}>
+            {notification.msg}
+          </div>
+        )}
 
         {view !== 'settings' && (
           <div className="app-nav">
