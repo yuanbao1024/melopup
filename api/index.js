@@ -147,11 +147,11 @@ export default async function handler(req, res) {
     return
   }
 
-  // ===== AI CHAT COMPLETIONS PROXY (server-side, no VITE_ prefix env vars) =====
+  // ===== AI CHAT COMPLETIONS PROXY (server-side, never exposed to browser) =====
   if (path === '/ai/v1/chat/completions' && req.method === 'POST') {
     try {
-      const aiKey = process.env['OPENAI_API_KEY']
-      const aiBaseURL = process.env['OPENAI_BASE_URL'] || 'https://api.deepseek.com/v1'
+      const aiKey = process.env['OPENAI_API_KEY'] || process.env['VITE_OPENAI_API_KEY']
+      const aiBaseURL = process.env['OPENAI_BASE_URL'] || process.env['VITE_OPENAI_BASE_URL'] || 'https://api.deepseek.com/v1'
 
       if (!aiKey) {
         console.error('[AI Proxy] OPENAI_API_KEY not configured on server')
