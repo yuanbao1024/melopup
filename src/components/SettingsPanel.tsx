@@ -33,9 +33,10 @@ const PROVIDERS: Record<string, ProviderTemplate> = {
 export default function SettingsPanel() {
   const { dispatch } = useAppState()
   const config = getApiConfig()
-  const [apiKey, setApiKey] = useState(config.apiKey)
-  const [baseURL, setBaseURL] = useState(config.baseURL)
-  const [model, setModel] = useState(config.model)
+  const isProxy = config.apiKey === 'proxy'
+  const [apiKey, setApiKey] = useState(isProxy ? '' : config.apiKey)
+  const [baseURL, setBaseURL] = useState(isProxy ? 'https://api.deepseek.com/v1' : config.baseURL)
+  const [model, setModel] = useState(isProxy ? 'deepseek-v4-flash' : config.model)
   const [saved, setSaved] = useState(false)
   const [activeProvider, setActiveProvider] = useState<string | null>(null)
 
@@ -69,7 +70,9 @@ export default function SettingsPanel() {
     setApiKey('')
     setBaseURL(PROVIDERS.openai.baseURL)
     setModel(PROVIDERS.openai.model)
-    saveApiConfig('', PROVIDERS.openai.baseURL, PROVIDERS.openai.model)
+    localStorage.removeItem('OPENAI_API_KEY')
+    localStorage.removeItem('OPENAI_BASE_URL')
+    localStorage.removeItem('OPENAI_MODEL')
     dispatch({ type: 'SET_API_CONFIGURED', payload: false })
     setActiveProvider(null)
   }
@@ -130,6 +133,15 @@ export default function SettingsPanel() {
       </div>
 
       <div className="settings-content">
+        {isProxy && (
+          <div className="settings-proxy-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>服务端代理已启用，AI 功能立即可用。如需使用自己的密钥请在下方配置。</span>
+          </div>
+        )}
+
         <div className="settings-section">
           <h3>选择服务商</h3>
           <p className="section-desc">一键切换，自动填入 API 地址和模型名称</p>

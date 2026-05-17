@@ -38,15 +38,15 @@ async function getClient(apiKey?: string): Promise<OpenAIClient> {
   const key = apiKey || config.apiKey
   const baseURL = config.baseURL
 
-  if (client) return client
+  if (client && key !== 'proxy') return client
 
-  if (!key || key === 'proxy') {
-    throw new Error('请先在设置中配置 API Key，或等待服务端代理就绪')
+  if (!key) {
+    throw new Error('请先在设置中配置 API Key')
   }
 
   const OpenAI = (await import('openai')).default
   client = new OpenAI({
-    apiKey: key,
+    apiKey: key === 'proxy' ? 'sk-proxy-placeholder' : key,
     baseURL,
     dangerouslyAllowBrowser: true,
     timeout: 60000,
@@ -449,7 +449,11 @@ export async function getTasteSummary(
 }
 
 export function saveApiConfig(apiKey: string, baseURL?: string, model?: string) {
-  localStorage.setItem('OPENAI_API_KEY', apiKey)
+  if (apiKey) {
+    localStorage.setItem('OPENAI_API_KEY', apiKey)
+  } else {
+    localStorage.removeItem('OPENAI_API_KEY')
+  }
   if (baseURL !== undefined) localStorage.setItem('OPENAI_BASE_URL', baseURL)
   if (model !== undefined) localStorage.setItem('OPENAI_MODEL', model)
   client = null
