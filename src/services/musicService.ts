@@ -93,11 +93,9 @@ class MusicService {
     try {
       this.sourceNode = this.audioContext.createMediaElementSource(this.audioElement)
     } catch (e) {
-      if (e instanceof DOMException && e.name === 'InvalidStateError') {
-        console.warn('MediaElementSource 已存在，继续使用当前连接')
-      } else {
-        throw e
-      }
+      console.warn('无法创建 MediaElementSource（可能是跨域限制），音频分析功能将不可用')
+      this._audioGraphReady = false
+      return
     }
 
     this.analyserNode = this.audioContext.createAnalyser()
@@ -190,8 +188,6 @@ class MusicService {
     await this.ensureAudioGraph()
 
     if (song.url) {
-      this.audioElement.crossOrigin = 'anonymous'
-      this.audioElement.referrerPolicy = 'no-referrer'
       this.audioElement.src = song.url
     } else if (song.path.startsWith('blob:') || song.path.startsWith('http')) {
       this.audioElement.src = song.path
