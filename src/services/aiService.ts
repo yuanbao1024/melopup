@@ -474,7 +474,7 @@ export function getApiConfig() {
 
   return {
     apiKey: 'proxy',
-    baseURL: '/api/ai/v1',
+    baseURL: typeof window !== 'undefined' ? window.location.origin + '/api/ai/v1' : '/api/ai/v1',
     model: 'deepseek-v4-flash',
   }
 }
