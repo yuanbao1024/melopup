@@ -6,9 +6,6 @@ const APPVER_COOKIE = 'appver=2.0.2; os=pc;'
 
 function getCookie() {
   if (userCookie) return userCookie
-  if (process.env['NETEASE_COOKIE'] || process.env['VITE_NETEASE_COOKIE']) {
-    return process.env['NETEASE_COOKIE'] || process.env['VITE_NETEASE_COOKIE'] || ''
-  }
   return getFallbackCookie()
 }
 
