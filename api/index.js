@@ -1,12 +1,18 @@
 import axios from 'axios'
+import { getFallbackCookie } from './cookie.js'
 
 let userCookie = ''
 const APPVER_COOKIE = 'appver=2.0.2; os=pc;'
 
-// Auto-init cookie from server-only env var (not VITE_ prefixed)
-if (process.env['NETEASE_COOKIE'] || process.env['VITE_NETEASE_COOKIE']) {
-  userCookie = process.env['NETEASE_COOKIE'] || process.env['VITE_NETEASE_COOKIE'] || ''
+function getCookie() {
+  if (userCookie) return userCookie
+  if (process.env['NETEASE_COOKIE'] || process.env['VITE_NETEASE_COOKIE']) {
+    return process.env['NETEASE_COOKIE'] || process.env['VITE_NETEASE_COOKIE'] || ''
+  }
+  return getFallbackCookie()
 }
+
+userCookie = getCookie()
 
 const COMMON_HEADERS = {
   'Referer': 'https://music.163.com/',

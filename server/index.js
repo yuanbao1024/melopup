@@ -16,6 +16,7 @@ const COMMON_HEADERS = {
 }
 
 let userCookie = ''
+const APPVER_COOKIE = 'appver=2.0.2; os=pc;'
 
 // Auto-init cookie from server env var
 if (process.env.NETEASE_COOKIE || process.env.VITE_NETEASE_COOKIE) {
