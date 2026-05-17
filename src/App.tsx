@@ -90,22 +90,34 @@ function AppContent() {
     switch (view) {
       case 'pet':
         return (
-          <div className="pet-view">
-            <PetDog />
+          <div className="pet-view-full">
             {currentSong && (
-              <div className="pet-song-bar" onClick={() => dispatch({ type: 'SET_VIEW', payload: 'player' })}>
-                <div className="pet-song-bar-cover">
-                  {currentSong.name?.charAt(0) || '♪'}
+              <div className="pet-song-bar-hero" onClick={() => dispatch({ type: 'SET_VIEW', payload: 'player' })}>
+                <div className="psb-hero-cover">
+                  {currentSong.cover ? (
+                    <img src={currentSong.cover} alt={currentSong.name} className="psb-hero-cover-img" />
+                  ) : (
+                    <span className="psb-hero-cover-fallback">{currentSong.name?.charAt(0) || '♪'}</span>
+                  )}
                 </div>
-                <div className="pet-song-bar-info">
-                  <div className="pet-song-bar-name">{currentSong.name}</div>
-                  <div className="pet-song-bar-artist">{currentSong.artist}</div>
+                <div className="psb-hero-info">
+                  <div className="psb-hero-name">{currentSong.name}</div>
+                  <div className="psb-hero-artist">{currentSong.artist}</div>
                 </div>
-                <div className={`pet-song-bar-indicator ${state.isPlaying ? 'playing' : ''}`}>
-                  <span /><span /><span />
+                <div className="psb-hero-indicator">
+                  {!state.isPlaying ? (
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  ) : (
+                    <div className="psb-hero-bars">
+                      <span /><span /><span /><span />
+                    </div>
+                  )}
                 </div>
               </div>
             )}
+            <PetDog />
           </div>
         )
       case 'player':

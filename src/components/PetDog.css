@@ -1,213 +1,152 @@
-.pet-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
+.pet-container-full {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.spline-wrapper {
   width: 100%;
   height: 100%;
-  position: relative;
-  z-index: 1;
-  padding: 12px 0;
-}
-
-.pet-mood-indicator {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 18px;
-  background: rgba(80, 200, 255, 0.06);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(80, 200, 255, 0.1);
-  border-radius: 20px;
-  position: relative;
-  overflow: hidden;
-  z-index: 2;
-  flex-shrink: 0;
+  justify-content: center;
 }
 
-.mood-indicator-glow {
+.spline-wrapper > div,
+.spline-wrapper > div > div,
+.spline-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.spline-pet-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pet-floating-music-canvas {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(80, 200, 255, 0.1), transparent);
-  animation: moodShimmer 3s ease-in-out infinite;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-}
-
-@keyframes moodShimmer {
-  0%, 100% { transform: translateX(-100%); }
-  50% { transform: translateX(200%); }
-}
-
-.mood-emoji {
-  font-size: 15px;
-  line-height: 1;
-  position: relative;
   z-index: 1;
 }
 
-.mood-label {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.65);
+/* ===== Lyric Art ===== */
+.lyric-art-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.lyric-art-line {
+  position: absolute;
+  top: calc(38% + var(--top-offset, 0px));
+  width: 40%;
+  padding: 0 32px;
+  opacity: 0;
+}
+
+.lyric-art-left {
+  left: 1%;
+  text-align: left;
+  animation: lyricFloatLeft 7s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+}
+
+.lyric-art-right {
+  right: 1%;
+  text-align: right;
+  animation: lyricFloatRight 7s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+}
+
+.lyric-art-text {
+  display: inline-block;
+  font-size: clamp(22px, 4.2vw, 42px);
   font-weight: 500;
+  line-height: 1.7;
+  letter-spacing: 0.04em;
+  font-style: italic;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 235, 210, 0.95) 0%,
+    rgba(255, 205, 178, 0.9) 30%,
+    rgba(252, 182, 159, 0.85) 60%,
+    rgba(255, 225, 180, 0.8) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 30px rgba(255, 200, 150, 0.12));
+  padding: 6px 0;
+  text-shadow: none;
   position: relative;
-  z-index: 1;
 }
 
-.pet-card {
-  position: relative;
-  width: 280px;
-  height: 300px;
-  border-radius: 30px;
-  background: linear-gradient(145deg, rgba(80, 200, 255, 0.06) 0%, rgba(30, 30, 60, 0.45) 50%, rgba(80, 200, 255, 0.03) 100%);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(80, 200, 255, 0.08);
-  box-shadow: 0 8px 36px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 0 30px rgba(80, 200, 255, 0.03);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: visible;
-  flex-shrink: 0;
-  z-index: 1;
-  transition: box-shadow 0.3s ease;
+.lyric-art-text::selection {
+  -webkit-text-fill-color: #fff;
+  background: rgba(255, 200, 150, 0.3);
 }
 
-.pet-card:hover {
-  box-shadow: 0 12px 48px rgba(80, 200, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 0 40px rgba(80, 200, 255, 0.05);
-}
-
-.pet-card-shine {
-  position: absolute;
-  inset: 0;
-  border-radius: 30px;
-  background: linear-gradient(135deg, transparent 30%, rgba(80, 200, 255, 0.04) 50%, transparent 70%);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.dog-click-ring {
-  position: absolute;
-  inset: -8px;
-  border-radius: 38px;
-  border: 1.5px solid rgba(80, 200, 255, 0.3);
-  box-shadow: 0 0 18px rgba(80, 200, 255, 0.1);
-  animation: clickRingExpand 0.6s ease-out forwards;
-  pointer-events: none;
-  z-index: 0;
-}
-
-@keyframes clickRingExpand {
-  0% { opacity: 1; transform: scale(0.95); }
-  100% { opacity: 0; transform: scale(1.15); }
-}
-
-.pet-pick-list {
-  display: flex;
-  gap: 6px;
-  padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 16px;
-  flex-shrink: 0;
-  z-index: 2;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.pet-pick-btn {
-  padding: 4px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.4);
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.pet-pick-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.7);
-  transform: translateY(-1px);
-}
-
-.pet-pick-btn.active {
-  background: rgba(80, 200, 255, 0.12);
-  border-color: rgba(80, 200, 255, 0.15);
-  color: rgba(255, 255, 255, 0.9);
-}
-
-/* Pet Sprite Animation */
-.pet-sprite-frame {
-  --pet-scale: 1;
-  width: calc(192px * var(--pet-scale));
-  height: calc(208px * var(--pet-scale));
-  overflow: hidden;
-  contain: layout paint;
-  cursor: pointer;
-}
-
-.pet-sprite-anim {
-  width: 192px;
-  height: 208px;
-  background-image: var(--sprite-url);
-  background-repeat: no-repeat;
-  background-size: 1536px 1872px;
-  image-rendering: pixelated;
-  transform: scale(var(--pet-scale)) translateZ(0);
-  transform-origin: top left;
-  will-change: background-position;
-  animation: pet-state var(--sprite-duration) steps(var(--sprite-frames)) infinite;
-}
-
-@keyframes pet-state {
-  from {
-    background-position: 0 var(--sprite-y);
+@keyframes lyricFloatLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px) translateY(0) scale(0.97);
   }
-  to {
-    background-position: var(--sprite-end-x) var(--sprite-y);
+  6% {
+    opacity: 0.9;
+    transform: translateX(0) translateY(0) scale(1);
+  }
+  35% {
+    opacity: 0.85;
+    transform: translateX(6px) translateY(-10vh) scale(1);
+  }
+  60% {
+    opacity: 0.5;
+    transform: translateX(-2px) translateY(-22vh) scale(0.98);
+  }
+  85% {
+    opacity: 0.15;
+    transform: translateX(4px) translateY(-38vh) scale(0.96);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(0) translateY(-50vh) scale(0.94);
   }
 }
 
-.pet-sprite-wrapper {
-  width: 240px;
-  height: 260px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 2;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.pet-sprite-wrapper:hover {
-  transform: scale(1.03);
-}
-
-.pet-sprite-wrapper:active {
-  transform: scale(0.97);
-}
-
-.pet-sprite-wrapper.petting {
-  animation: petBounce 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) 2;
-}
-
-@keyframes petBounce {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(-2deg) scale(1.03); }
-  75% { transform: rotate(2deg) scale(1.03); }
-}
-
-.pet-sprite-wrapper.beat-active {
-  animation: beatSqueeze 0.15s ease-out;
-}
-
-@keyframes beatSqueeze {
-  0% { transform: scaleX(1) scaleY(1); }
-  50% { transform: scaleX(0.97) scaleY(1.03); }
-  100% { transform: scaleX(1) scaleY(1); }
+@keyframes lyricFloatRight {
+  0% {
+    opacity: 0;
+    transform: translateX(20px) translateY(0) scale(0.97);
+  }
+  6% {
+    opacity: 0.9;
+    transform: translateX(0) translateY(0) scale(1);
+  }
+  35% {
+    opacity: 0.85;
+    transform: translateX(-6px) translateY(-10vh) scale(1);
+  }
+  60% {
+    opacity: 0.5;
+    transform: translateX(2px) translateY(-22vh) scale(0.98);
+  }
+  85% {
+    opacity: 0.15;
+    transform: translateX(-4px) translateY(-38vh) scale(0.96);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(0) translateY(-50vh) scale(0.94);
+  }
 }

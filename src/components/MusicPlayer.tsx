@@ -108,9 +108,11 @@ export default function MusicPlayer() {
 
   const handleProgressClick = (e: React.MouseEvent) => {
     const rect = progressBarRef.current?.getBoundingClientRect()
-    if (!rect || duration <= 0) return
+    if (!rect) return
+    const d = musicService.getDuration()
+    if (d <= 0) return
     const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
-    musicService.seek(pct * duration)
+    musicService.seek(pct * d)
   }
 
   const formatTime = (s: number) => {
