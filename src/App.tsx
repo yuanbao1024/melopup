@@ -28,12 +28,6 @@ function AppContent() {
     const savedCookie = localStorage.getItem(COOKIE_STORAGE_KEY)
     if (savedCookie) {
       setNeteaseCookie(savedCookie).catch(() => {})
-    } else {
-      const envCookie = import.meta.env.VITE_NETEASE_COOKIE as string | undefined
-      if (envCookie) {
-        setNeteaseCookie(envCookie).catch(() => {})
-        localStorage.setItem(COOKIE_STORAGE_KEY, envCookie)
-      }
     }
 
     musicService.onTimeUpdateCallback((time) => {

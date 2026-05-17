@@ -2,23 +2,9 @@ type OpenAIClient = any
 
 let client: OpenAIClient | null = null
 
-function getProvider(): string {
-  const baseURL = localStorage.getItem('OPENAI_BASE_URL') || 'https://api.openai.com/v1'
-  if (baseURL.includes('deepseek')) return 'deepseek'
-  if (baseURL.includes('moonshot') || baseURL.includes('kimi')) return 'moonshot'
-  return 'openai'
-}
-
 function getDefaultModel(): string {
-  const provider = getProvider()
-  switch (provider) {
-    case 'deepseek':
-      return 'deepseek-chat'
-    case 'moonshot':
-      return 'moonshot-v1-8k'
-    default:
-      return 'gpt-4o-mini'
-  }
+  const config = getApiConfig()
+  return config.model
 }
 
 function extractJson(text: string): string {
@@ -48,13 +34,14 @@ function extractJsonArray(text: string): string {
 }
 
 async function getClient(apiKey?: string): Promise<OpenAIClient> {
-  const key = apiKey || localStorage.getItem('OPENAI_API_KEY') || ''
-  const baseURL = localStorage.getItem('OPENAI_BASE_URL') || 'https://api.openai.com/v1'
+  const config = getApiConfig()
+  const key = apiKey || config.apiKey
+  const baseURL = config.baseURL
 
   if (client) return client
 
-  if (!key) {
-    throw new Error('请先在设置中配置 API Key')
+  if (!key || key === 'proxy') {
+    throw new Error('请先在设置中配置 API Key，或等待服务端代理就绪')
   }
 
   const OpenAI = (await import('openai')).default
@@ -469,15 +456,22 @@ export function saveApiConfig(apiKey: string, baseURL?: string, model?: string) 
 }
 
 export function getApiConfig() {
-  const envKey = import.meta.env.VITE_OPENAI_API_KEY as string | undefined
-  const envBaseURL = import.meta.env.VITE_OPENAI_BASE_URL as string | undefined
-  const envModel = import.meta.env.VITE_OPENAI_MODEL as string | undefined
+  const userKey = localStorage.getItem('OPENAI_API_KEY')
+  const userBaseURL = localStorage.getItem('OPENAI_BASE_URL')
+  const userModel = localStorage.getItem('OPENAI_MODEL')
 
-  const baseURL = localStorage.getItem('OPENAI_BASE_URL') || envBaseURL || 'https://api.openai.com/v1'
+  if (userKey) {
+    return {
+      apiKey: userKey,
+      baseURL: userBaseURL || 'https://api.openai.com/v1',
+      model: userModel || 'gpt-4o-mini',
+    }
+  }
+
   return {
-    apiKey: localStorage.getItem('OPENAI_API_KEY') || envKey || '',
-    baseURL,
-    model: localStorage.getItem('OPENAI_MODEL') || envModel || getDefaultModel(),
+    apiKey: 'proxy',
+    baseURL: '/api/ai/v1',
+    model: 'deepseek-v4-flash',
   }
 }
 

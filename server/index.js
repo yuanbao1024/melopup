@@ -1,6 +1,8 @@
 const express = require('express')
 const cors = require('cors')
 const axios = require('axios')
+const path = require('path')
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') })
 
 const app = express()
 const PORT = 3456
@@ -14,6 +16,11 @@ const COMMON_HEADERS = {
 }
 
 let userCookie = ''
+
+// Auto-init cookie from server env var
+if (process.env.NETEASE_COOKIE || process.env.VITE_NETEASE_COOKIE) {
+  userCookie = process.env.NETEASE_COOKIE || process.env.VITE_NETEASE_COOKIE || ''
+}
 
 const apiClient = axios.create({
   headers: COMMON_HEADERS,
@@ -242,6 +249,37 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() })
 })
 
+// ===== AI Chat Completions Proxy (server-side key, never exposed to browser) =====
+app.post('/api/ai/v1/chat/completions', async (req, res) => {
+  try {
+    const aiKey = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY
+    const aiBaseURL = process.env.OPENAI_BASE_URL || process.env.VITE_OPENAI_BASE_URL || 'https://api.deepseek.com/v1'
+
+    if (!aiKey) {
+      return res.status(500).json({ error: 'Server AI proxy not configured' })
+    }
+
+    const response = await axios.post(`${aiBaseURL}/chat/completions`, req.body, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${aiKey}`,
+      },
+      responseType: 'stream',
+      timeout: 60000,
+    })
+
+    res.set({
+      'Content-Type': response.headers['content-type'] || 'text/event-stream',
+      'Cache-Control': 'no-cache',
+    })
+
+    response.data.pipe(res)
+  } catch (err) {
+    console.error('[AI Proxy] error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 app.listen(PORT, () => {
   console.log(`[Music API Proxy] 服务已启动: http://localhost:${PORT}`)
   console.log(`[Music API Proxy] 可用接口:`)
@@ -252,4 +290,5 @@ app.listen(PORT, () => {
   console.log(`  GET /api/recommend/playlists?limit=30`)
   console.log(`  GET /api/song/detail?ids=123,456`)
   console.log(`  GET /api/lyric?id=123456`)
+  console.log(`  POST /api/ai/v1/chat/completions (AI 代理，密钥在服务端，不暴露给浏览器)`)
 })
