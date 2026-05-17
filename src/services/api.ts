@@ -50,7 +50,7 @@ export async function getSongUrl(id: string, br = 320000): Promise<string | null
   const songData = (data.data || []).find((d: any) => String(d.id) === String(id))
   if (songData && songData.url) {
     if (songData.fee && songData.fee > 0 && !songData.url) return null
-    return songData.url
+    return songData.url.replace(/^http:\/\//, 'https://')
   }
   if (br > 128000) return getSongUrl(id, 128000)
   return null

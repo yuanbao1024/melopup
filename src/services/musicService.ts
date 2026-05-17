@@ -191,6 +191,7 @@ class MusicService {
 
     if (song.url) {
       this.audioElement.crossOrigin = 'anonymous'
+      this.audioElement.referrerPolicy = 'no-referrer'
       this.audioElement.src = song.url
     } else if (song.path.startsWith('blob:') || song.path.startsWith('http')) {
       this.audioElement.src = song.path
